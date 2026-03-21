@@ -833,7 +833,7 @@ def main():
     with st.sidebar:
         st.markdown("## 👤 Patient Information")
         
-        patient_name = st.text_input("Patient Name", value="", key="patient_name")
+        patient_name = st.text_input("Patient Name", key="patient_name")
         age = st.number_input("Age", min_value=0, max_value=120, key="age")
         gender = st.selectbox("Gender", ["male", "female"], key="gender")
         blood_group = st.selectbox("Blood Group", 
