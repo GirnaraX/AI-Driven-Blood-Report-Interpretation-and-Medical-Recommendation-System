@@ -1,6 +1,6 @@
-streamlit==1.28.0
-pandas==2.2.0  # Updated to a version compatible with Python 3.14
-mysql-connector-python==8.0.33
-numpy==1.26.0
-plotly==5.18.0
-python-dotenv==1.0.0
+streamlit>=1.28.0
+pandas>=2.0.3
+mysql-connector-python>=8.0.33  # Note: use mysql-connector-python, not mysql-connector
+numpy>=1.24.0
+plotly>=5.14.0
+python-dotenv>=1.0.0
