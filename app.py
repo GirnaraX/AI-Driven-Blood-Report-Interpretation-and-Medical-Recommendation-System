@@ -9,10 +9,6 @@ import json
 import os
 import base64
 from io import BytesIO
-import mysql.connector
-from mysql.connector import Error
-
-
 
 # Page configuration
 st.set_page_config(
@@ -33,8 +29,6 @@ if 'analyze_clicked' not in st.session_state:
     st.session_state.analyze_clicked = False
 if 'analysis_done' not in st.session_state:
     st.session_state.analysis_done = False
-if 'db_connected' not in st.session_state:
-    st.session_state.db_connected = False
 
 # Custom CSS for better UI
 st.markdown("""
@@ -115,236 +109,6 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
-# Database configuration
-DB_CONFIG = {
-    'host': 'localhost',
-    'database': 'blood_report_analyzer',
-    'user': 'root',  # Change this to your MySQL username
-    'password': 'girnara'  # Change this to your MySQL password
-}
-
-def create_db_connection():
-    """Create a database connection"""
-    try:
-        connection = mysql.connector.connect(
-            host=DB_CONFIG['host'],
-            user=DB_CONFIG['user'],
-            password=DB_CONFIG['password']
-        )
-        
-        # Create database if it doesn't exist
-        cursor = connection.cursor()
-        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_CONFIG['database']}")
-        cursor.close()
-        connection.close()
-        
-        # Connect to the specific database
-        connection = mysql.connector.connect(
-            host=DB_CONFIG['host'],
-            database=DB_CONFIG['database'],
-            user=DB_CONFIG['user'],
-            password=DB_CONFIG['password']
-        )
-        
-        return connection
-    except Error as e:
-        st.error(f"Error connecting to MySQL database: {e}")
-        return None
-
-def init_database():
-    """Initialize database tables"""
-    connection = create_db_connection()
-    if connection:
-        try:
-            cursor = connection.cursor()
-            
-            # Create patients table
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS patients (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    patient_name VARCHAR(100),
-                    age INT,
-                    gender VARCHAR(10),
-                    blood_group VARCHAR(5),
-                    report_date DATE,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            """)
-            
-            # Create blood_reports table
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS blood_reports (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    patient_id INT,
-                    category VARCHAR(50),
-                    parameter VARCHAR(100),
-                    value FLOAT,
-                    unit VARCHAR(20),
-                    status VARCHAR(20),
-                    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
-                )
-            """)
-            
-            # Create analysis_results table
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS analysis_results (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    patient_id INT,
-                    summary TEXT,
-                    normal_count INT,
-                    abnormal_count INT,
-                    critical_count INT,
-                    conditions_detected JSON,
-                    recommendations JSON,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
-                )
-            """)
-            
-            connection.commit()
-            cursor.close()
-            connection.close()
-            st.session_state.db_connected = True
-            return True
-        except Error as e:
-            st.error(f"Error initializing database: {e}")
-            st.session_state.db_connected = False
-            return False
-    return False
-
-def save_patient_to_db(patient_info):
-    """Save patient information to database"""
-    connection = create_db_connection()
-    if connection:
-        try:
-            cursor = connection.cursor()
-            
-            # Insert patient
-            query = """
-                INSERT INTO patients (patient_name, age, gender, blood_group, report_date)
-                VALUES (%s, %s, %s, %s, %s)
-            """
-            values = (
-                patient_info.get('name', 'Unknown'),
-                patient_info.get('age', 0),
-                patient_info.get('gender', 'Unknown'),
-                patient_info.get('blood_group', 'Unknown'),
-                patient_info.get('report_date', datetime.now().date())
-            )
-            
-            cursor.execute(query, values)
-            connection.commit()
-            patient_id = cursor.lastrowid
-            cursor.close()
-            connection.close()
-            return patient_id
-        except Error as e:
-            st.error(f"Error saving patient to database: {e}")
-            return None
-    return None
-
-def save_blood_report_to_db(patient_id, report_data, analysis_results):
-    """Save blood report data to database"""
-    connection = create_db_connection()
-    if connection:
-        try:
-            cursor = connection.cursor()
-            
-            # Save individual blood parameters
-            for category, parameters in report_data.items():
-                for param, value in parameters.items():
-                    # Find status from analysis results
-                    status = 'normal'
-                    for p in analysis_results.get('normal_parameters', []):
-                        if p.get('parameter') == param:
-                            status = 'normal'
-                            break
-                    for p in analysis_results.get('abnormal_parameters', []):
-                        if p.get('parameter') == param:
-                            status = 'abnormal'
-                            break
-                    for p in analysis_results.get('critical_parameters', []):
-                        if p.get('parameter') == param:
-                            status = 'critical'
-                            break
-                    
-                    # Find unit from reference ranges
-                    unit = ''
-                    for cat, ref_params in REFERENCE_RANGES.items():
-                        if param in ref_params:
-                            unit = ref_params[param].get('unit', '')
-                            break
-                    
-                    query = """
-                        INSERT INTO blood_reports (patient_id, category, parameter, value, unit, status)
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                    """
-                    cursor.execute(query, (patient_id, category, param, float(value), unit, status))
-            
-            # Save analysis results summary
-            conditions_json = json.dumps(analysis_results.get('conditions_detected', []))
-            recommendations_json = json.dumps(analysis_results.get('recommendations', []))
-            
-            query = """
-                INSERT INTO analysis_results (patient_id, summary, normal_count, abnormal_count, critical_count, conditions_detected, recommendations)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """
-            cursor.execute(query, (
-                patient_id,
-                analysis_results.get('summary', ''),
-                len(analysis_results.get('normal_parameters', [])),
-                len(analysis_results.get('abnormal_parameters', [])),
-                len(analysis_results.get('critical_parameters', [])),
-                conditions_json,
-                recommendations_json
-            ))
-            
-            connection.commit()
-            cursor.close()
-            connection.close()
-            return True
-        except Error as e:
-            st.error(f"Error saving blood report to database: {e}")
-            return False
-    return False
-
-def get_patient_history(patient_name=None):
-    """Retrieve patient history from database"""
-    connection = create_db_connection()
-    if connection:
-        try:
-            cursor = connection.cursor(dictionary=True)
-            
-            if patient_name:
-                query = """
-                    SELECT p.*, a.summary, a.normal_count, a.abnormal_count, a.critical_count, 
-                           a.conditions_detected, a.created_at as analysis_date
-                    FROM patients p
-                    LEFT JOIN analysis_results a ON p.id = a.patient_id
-                    WHERE p.patient_name LIKE %s
-                    ORDER BY p.created_at DESC
-                """
-                cursor.execute(query, (f'%{patient_name}%',))
-            else:
-                query = """
-                    SELECT p.*, a.summary, a.normal_count, a.abnormal_count, a.critical_count, 
-                           a.conditions_detected, a.created_at as analysis_date
-                    FROM patients p
-                    LEFT JOIN analysis_results a ON p.id = a.patient_id
-                    ORDER BY p.created_at DESC
-                    LIMIT 100
-                """
-                cursor.execute(query)
-            
-            results = cursor.fetchall()
-            cursor.close()
-            connection.close()
-            return results
-        except Error as e:
-            st.error(f"Error retrieving patient history: {e}")
-            return []
-    return []
 
 # Blood test reference ranges (FIXED: Added missing parameters)
 REFERENCE_RANGES = {
@@ -850,14 +614,72 @@ def get_table_download_link(df, filename, text):
     href = f'<a href="data:file/csv;base64,{b64}" download="{filename}">{text}</a>'
     return href
 
+def append_record_to_file(filepath, record):
+    """Append a record (dict) to a JSON file, creating the file if needed."""
+    try:
+        # ensure folder exists
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        if os.path.exists(filepath):
+            with open(filepath, 'r+', encoding='utf-8') as f:
+                try:
+                    data = json.load(f)
+                except json.JSONDecodeError:
+                    data = []
+                data.append(record)
+                f.seek(0)
+                json.dump(data, f, indent=2)
+                f.truncate()
+        else:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump([record], f, indent=2)
+    except Exception as e:
+        print(f"Failed to append record to {filepath}: {e}")
+
+def append_record_to_csv(filepath, record):
+    """Append a record to a CSV file."""
+    # flatten nested structures
+    flat = {}
+
+    def _flatten(prefix, value):
+        if isinstance(value, dict):
+            for k, v in value.items():
+                _flatten(f"{prefix}{k}_", v)
+        elif isinstance(value, list):
+            flat[prefix[:-1]] = json.dumps(value, ensure_ascii=False)
+        else:
+            flat[prefix[:-1]] = value
+
+    _flatten("", record)
+
+    df = pd.DataFrame([flat])
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    if os.path.exists(filepath):
+        df.to_csv(filepath, mode="a", header=False, index=False)
+    else:
+        df.to_csv(filepath, index=False)
+
 def save_analysis_record(patient_info, report_data, results):
-    """Save analysis record to MySQL database"""
-    # First save patient info
-    patient_id = save_patient_to_db(patient_info)
-    
-    if patient_id:
-        # Then save blood report and analysis results
-        save_blood_report_to_db(patient_id, report_data, results)
+    """Build a record from the current analysis and save to history/patients files."""
+    # FIXED: Create record with all required fields
+    record = {
+        "patient_info": patient_info,
+        "report_data": report_data,
+        "analysis_results": {
+            "summary": results.get("summary", ""),
+            "normal_parameters": results.get("normal_parameters", []),
+            "abnormal_parameters": results.get("abnormal_parameters", []),
+            "critical_parameters": results.get("critical_parameters", []),
+            "conditions_detected": results.get("conditions_detected", []),
+            "recommendations": results.get("recommendations", [])
+        },
+        "timestamp": datetime.now().isoformat()
+    }
+    # save to CSV files
+    try:
+        append_record_to_csv(os.path.join("data", "history.csv"), record)
+        append_record_to_csv(os.path.join("data", "patients.csv"), record)
+    except Exception as e:
+        print(f"Error saving record: {e}")
 
 def generate_html_report(patient_info, report_data, results):
     """Generate HTML report for printing"""
@@ -1004,14 +826,6 @@ def main():
     st.markdown('<h1 class="main-header">🩺 AI-Driven Blood Report Interpretation System</h1>', 
                 unsafe_allow_html=True)
     
-    # Initialize database connection
-    if not st.session_state.db_connected:
-        with st.spinner("Connecting to database..."):
-            if init_database():
-                st.success("✅ Connected to MySQL database successfully!")
-            else:
-                st.warning("⚠️ Please configure MySQL database connection in the code before using the app.")
-    
     # Initialize analyzer
     analyzer = BloodReportAnalyzer()
     
@@ -1019,12 +833,12 @@ def main():
     with st.sidebar:
         st.markdown("## 👤 Patient Information")
         
-        patient_name = st.text_input("Patient Name", key="patient_name")
-        age = st.number_input("Age", min_value=0, max_value=120, key="age")
+        patient_name = st.text_input("Patient Name", value="John Doe", key="patient_name")
+        age = st.number_input("Age", min_value=0, max_value=120, value=30, key="age")
         gender = st.selectbox("Gender", ["male", "female"], key="gender")
         blood_group = st.selectbox("Blood Group", 
-                               ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"], 
-                               key="blood_group")
+                                   ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"], 
+                                   key="blood_group")
         
         st.markdown("---")
         st.markdown("## 📋 Report Date")
@@ -1037,17 +851,10 @@ def main():
             "personalized medical recommendations. Always consult with a "
             "healthcare professional for proper diagnosis."
         )
-        
-        # Database status indicator
-        if st.session_state.db_connected:
-            st.markdown("---")
-            st.markdown("## 💾 Database Status")
-            st.success("✅ MySQL Connected")
     
     # Main content area
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "📊 Input Report", "🔍 Analysis Results", "📈 Visualizations", 
-        "📥 Export Report", "📋 Patient History"
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "📊 Input Report", "🔍 Analysis Results", "📈 Visualizations", "📥 Export Report"
     ])
     
     with tab1:
@@ -1138,14 +945,12 @@ def main():
                     st.session_state.analyze_clicked = True
                     st.session_state.analysis_done = True
                     
-                    # save record after analysis (to MySQL)
-                    if st.session_state.db_connected:
-                        save_analysis_record(
-                            st.session_state.patient_info,
-                            st.session_state.report_data,
-                            results
-                        )
-                        st.success("✅ Data saved to MySQL database!")
+                    # save record after analysis
+                    save_analysis_record(
+                        st.session_state.patient_info,
+                        st.session_state.report_data,
+                        results
+                    )
                 
                 st.success("✅ CBC data added! Analysis updated with all accumulated categories.")
         
@@ -1197,14 +1002,12 @@ def main():
                     st.session_state.analyze_clicked = True
                     st.session_state.analysis_done = True
                     
-                    # save record after analysis (to MySQL)
-                    if st.session_state.db_connected:
-                        save_analysis_record(
-                            st.session_state.patient_info,
-                            st.session_state.report_data,
-                            results
-                        )
-                        st.success("✅ Data saved to MySQL database!")
+                    # save record after analysis
+                    save_analysis_record(
+                        st.session_state.patient_info,
+                        st.session_state.report_data,
+                        results
+                    )
                 
                 st.success("✅ Lipid Profile data added! Analysis updated with all accumulated categories.")
         
@@ -1265,14 +1068,12 @@ def main():
                     st.session_state.analyze_clicked = True
                     st.session_state.analysis_done = True
                     
-                    # save record after analysis (to MySQL)
-                    if st.session_state.db_connected:
-                        save_analysis_record(
-                            st.session_state.patient_info,
-                            st.session_state.report_data,
-                            results
-                        )
-                        st.success("✅ Data saved to MySQL database!")
+                    # save record after analysis
+                    save_analysis_record(
+                        st.session_state.patient_info,
+                        st.session_state.report_data,
+                        results
+                    )
                 
                 st.success("✅ Liver Function data added! Analysis updated with all accumulated categories.")
         
@@ -1321,14 +1122,12 @@ def main():
                     st.session_state.analyze_clicked = True
                     st.session_state.analysis_done = True
                     
-                    # save record after analysis (to MySQL)
-                    if st.session_state.db_connected:
-                        save_analysis_record(
-                            st.session_state.patient_info,
-                            st.session_state.report_data,
-                            results
-                        )
-                        st.success("✅ Data saved to MySQL database!")
+                    # save record after analysis
+                    save_analysis_record(
+                        st.session_state.patient_info,
+                        st.session_state.report_data,
+                        results
+                    )
                 
                 st.success("✅ Kidney Function data added! Analysis updated with all accumulated categories.")
         
@@ -1377,14 +1176,12 @@ def main():
                     st.session_state.analyze_clicked = True
                     st.session_state.analysis_done = True
                     
-                    # save record after analysis (to MySQL)
-                    if st.session_state.db_connected:
-                        save_analysis_record(
-                            st.session_state.patient_info,
-                            st.session_state.report_data,
-                            results
-                        )
-                        st.success("✅ Data saved to MySQL database!")
+                    # save record after analysis
+                    save_analysis_record(
+                        st.session_state.patient_info,
+                        st.session_state.report_data,
+                        results
+                    )
                 
                 st.success("✅ Thyroid Profile data added! Analysis updated with all accumulated categories.")
         
@@ -1430,14 +1227,12 @@ def main():
                     st.session_state.analyze_clicked = True
                     st.session_state.analysis_done = True
                     
-                    # save record after analysis (to MySQL)
-                    if st.session_state.db_connected:
-                        save_analysis_record(
-                            st.session_state.patient_info,
-                            st.session_state.report_data,
-                            results
-                        )
-                        st.success("✅ Data saved to MySQL database!")
+                    # save record after analysis
+                    save_analysis_record(
+                        st.session_state.patient_info,
+                        st.session_state.report_data,
+                        results
+                    )
                 
                 st.success("✅ Diabetes Profile data added! Analysis updated with all accumulated categories.")
         
@@ -1483,14 +1278,12 @@ def main():
                     st.session_state.analyze_clicked = True
                     st.session_state.analysis_done = True
                     
-                    # save record after analysis (to MySQL)
-                    if st.session_state.db_connected:
-                        save_analysis_record(
-                            st.session_state.patient_info,
-                            st.session_state.report_data,
-                            results
-                        )
-                        st.success("✅ Data saved to MySQL database!")
+                    # save record after analysis
+                    save_analysis_record(
+                        st.session_state.patient_info,
+                        st.session_state.report_data,
+                        results
+                    )
                 
                 st.success("✅ Iron Studies data added! Analysis updated with all accumulated categories.")
         
@@ -1542,14 +1335,12 @@ def main():
                     st.session_state.analyze_clicked = True
                     st.session_state.analysis_done = True
                     
-                    # save record after analysis (to MySQL)
-                    if st.session_state.db_connected:
-                        save_analysis_record(
-                            st.session_state.patient_info,
-                            st.session_state.report_data,
-                            results
-                        )
-                        st.success("✅ Data saved to MySQL database!")
+                    # save record after analysis
+                    save_analysis_record(
+                        st.session_state.patient_info,
+                        st.session_state.report_data,
+                        results
+                    )
                 
                 st.success("✅ Electrolytes data added! Analysis updated with all accumulated categories.")
         
@@ -2015,74 +1806,6 @@ Conditions detected: {len(results.get('conditions_detected', []))}
             st.text_area("Report Summary (Copy to share)", report_summary, height=100)
         else:
             st.info("👈 Please analyze a report first to export results")
-    
-    with tab5:
-        st.markdown('<h2 class="sub-header">📋 Patient History</h2>', 
-                   unsafe_allow_html=True)
-        
-        if st.session_state.db_connected:
-            # Search functionality
-            search_name = st.text_input("Search by patient name (leave empty to see all recent)", key="search_patient")
-            
-            if st.button("🔍 Search History", key="search_history"):
-                with st.spinner("Retrieving patient history..."):
-                    history = get_patient_history(search_name if search_name else None)
-                    
-                    if history:
-                        st.success(f"Found {len(history)} records")
-                        
-                        # Display history in a table
-                        history_df = pd.DataFrame(history)
-                        
-                        # Select and rename columns for display
-                        display_columns = ['patient_name', 'age', 'gender', 'blood_group', 'report_date', 
-                                         'normal_count', 'abnormal_count', 'critical_count', 'analysis_date']
-                        
-                        if all(col in history_df.columns for col in display_columns):
-                            display_df = history_df[display_columns].copy()
-                            display_df.columns = ['Name', 'Age', 'Gender', 'Blood Group', 'Report Date', 
-                                                 'Normal', 'Abnormal', 'Critical', 'Analysis Date']
-                            
-                            st.dataframe(display_df, use_container_width=True)
-                            
-                            # Option to view full details
-                            if len(history) > 0:
-                                selected_patient = st.selectbox(
-                                    "Select a patient to view full details",
-                                    options=[f"{row['patient_name']} - {row['report_date']}" for row in history]
-                                )
-                                
-                                if selected_patient:
-                                    st.json(history[0])  # Display first match details
-                        else:
-                            st.warning("No detailed records found")
-                    else:
-                        st.info("No patient history found")
-            else:
-                # Show recent history by default
-                with st.spinner("Loading recent history..."):
-                    recent_history = get_patient_history()
-                    
-                    if recent_history:
-                        st.write("Recent analyses (last 100 records):")
-                        
-                        # Display recent history in a table
-                        history_df = pd.DataFrame(recent_history)
-                        
-                        # Select and rename columns for display
-                        display_columns = ['patient_name', 'age', 'gender', 'blood_group', 'report_date', 
-                                         'normal_count', 'abnormal_count', 'critical_count', 'analysis_date']
-                        
-                        if all(col in history_df.columns for col in display_columns):
-                            display_df = history_df[display_columns].copy()
-                            display_df.columns = ['Name', 'Age', 'Gender', 'Blood Group', 'Report Date', 
-                                                 'Normal', 'Abnormal', 'Critical', 'Analysis Date']
-                            
-                            st.dataframe(display_df, use_container_width=True)
-                    else:
-                        st.info("No patient history available yet")
-        else:
-            st.warning("⚠️ Please configure MySQL database connection to view patient history")
 
 # Run the app
 if __name__ == "__main__":
