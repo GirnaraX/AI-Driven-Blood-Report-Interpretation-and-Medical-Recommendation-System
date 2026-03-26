@@ -814,7 +814,7 @@ Conditions detected: {len(results.get('conditions_detected', []))}
         else:
             st.info("👈 Please analyze a report first to export results")
 
-    with tab5:
+    # with tab5:
         st.markdown('<h2 class="sub-header">🤖 AI Blood Report Assistant</h2>', unsafe_allow_html=True)
         st.markdown("Ask questions about your blood report. The AI has access to your analysis results and can explain abnormalities, suggest lifestyle changes, and more.")
 
