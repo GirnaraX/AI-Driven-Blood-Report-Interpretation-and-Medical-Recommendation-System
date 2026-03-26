@@ -26,10 +26,6 @@ st.set_page_config(
 # Initialize analyzer
 analyzer = BloodReportAnalyzer()
 
-# Initialize AI chat (if not already)
-if 'chat' not in st.session_state:
-    st.session_state.chat = BloodReportChat()
-
 # Initialize session state
 if 'analysis_results' not in st.session_state:
     st.session_state.analysis_results = None
@@ -43,8 +39,6 @@ if 'analysis_done' not in st.session_state:
     st.session_state.analysis_done = False
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
-if 'chat' not in st.session_state:
-    st.session_state.chat = BloodReportChat()
 
 # Load custom CSS
 with open('styles.css', 'r') as f:
