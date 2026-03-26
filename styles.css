@@ -1,0 +1,74 @@
+.main-header {
+    font-size: 3rem;
+    color: #2c3e50;
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 30px;
+}
+.sub-header {
+    font-size: 1.5rem;
+    color: #34495e;
+    padding: 10px;
+    border-bottom: 2px solid #3498db;
+}
+.metric-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin: 10px 0;
+}
+.normal-range {
+    color: #27ae60;
+    font-weight: bold;
+}
+.abnormal-range {
+    color: #e74c3c;
+    font-weight: bold;
+}
+.recommendation-box {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 4px solid #3498db;
+    margin: 10px 0;
+}
+.stButton>button {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 25px;
+}
+.stButton>button:hover {
+    transform: scale(1.05);
+    transition: 0.3s;
+}
+.success-box {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #28a745;
+    margin: 10px 0;
+}
+.warning-box {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #ffc107;
+    margin: 10px 0;
+}
+.danger-box {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #dc3545;
+    margin: 10px 0;
+}
