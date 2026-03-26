@@ -814,6 +814,5 @@ Conditions detected: {len(results.get('conditions_detected', []))}
         else:
             st.info("👈 Please analyze a report first to export results")
 
-    
 if __name__ == "__main__":
     main()
