@@ -13,7 +13,7 @@ from io import BytesIO
 # Import backend modules
 from blood_analyzer import BloodReportAnalyzer, REFERENCE_RANGES
 from storage import save_analysis_record
-from ai_chat import BloodReportChat
+
 
 # Page configuration
 st.set_page_config(
