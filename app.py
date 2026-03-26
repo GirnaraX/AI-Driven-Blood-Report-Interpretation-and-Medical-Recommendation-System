@@ -814,36 +814,6 @@ Conditions detected: {len(results.get('conditions_detected', []))}
         else:
             st.info("👈 Please analyze a report first to export results")
 
-    # with tab5:
-        st.markdown('<h2 class="sub-header">🤖 AI Blood Report Assistant</h2>', unsafe_allow_html=True)
-        st.markdown("Ask questions about your blood report. The AI has access to your analysis results and can explain abnormalities, suggest lifestyle changes, and more.")
-
-        if not st.session_state.get('analysis_results') or not st.session_state.get('patient_info'):
-            st.warning("Please analyze a blood report first. The AI needs the report data to answer questions.")
-        elif not st.session_state.chat or not st.session_state.chat.model:
-            st.warning("🤖 Gemini AI is not available. Please set the GEMINI_API_KEY environment variable or add it to Streamlit secrets.")
-        else:
-            # Display chat history
-            for message in st.session_state.chat_history:
-                with st.chat_message(message["role"]):
-                    st.markdown(message["content"])
-
-            # Chat input
-            if prompt := st.chat_input("Ask about your blood report..."):
-                st.session_state.chat_history.append({"role": "user", "content": prompt})
-                with st.chat_message("user"):
-                    st.markdown(prompt)
-
-                with st.chat_message("assistant"):
-                    with st.spinner("Thinking..."):
-                        response = st.session_state.chat.get_response(prompt, st.session_state.chat_history)
-                    st.markdown(response)
-                st.session_state.chat_history.append({"role": "assistant", "content": response})
-
-            # Clear chat button
-            if st.button("Clear Chat"):
-                st.session_state.chat_history = []
-                st.rerun()
-
+    
 if __name__ == "__main__":
     main()
