@@ -14,6 +14,7 @@ from io import BytesIO
 from blood_analyzer import BloodReportAnalyzer, REFERENCE_RANGES
 from storage import save_analysis_record
 
+
 # Page configuration
 st.set_page_config(
     page_title="AI Blood Report Analyzer",
@@ -21,6 +22,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Initialize analyzer
+analyzer = BloodReportAnalyzer()
 
 # Initialize session state
 if 'analysis_results' not in st.session_state:
@@ -35,8 +39,6 @@ if 'analysis_done' not in st.session_state:
     st.session_state.analysis_done = False
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
-if 'chat' not in st.session_state:
-    st.session_state.chat = None
 
 # Load custom CSS
 with open('styles.css', 'r') as f:
@@ -222,7 +224,6 @@ def main():
         st.markdown("## 📋 Report Date")
         report_date = st.date_input("Test Date", datetime.now(), key="report_date")
 
-        
         st.markdown("---")
         st.markdown("## ℹ️ About")
         st.info(
@@ -812,39 +813,6 @@ Conditions detected: {len(results.get('conditions_detected', []))}
             st.text_area("Report Summary (Copy to share)", report_summary, height=100)
         else:
             st.info("👈 Please analyze a report first to export results")
-
-    with tab5:
-        st.markdown('<h2 class="sub-header">🤖 AI Blood Report Assistant</h2>', unsafe_allow_html=True)
-        st.markdown("Ask questions about your blood report. The AI has access to your analysis results and can explain abnormalities, suggest lifestyle changes, and more.")
-
-        if not st.session_state.get('analysis_results') or not st.session_state.get('patient_info'):
-            st.warning("Please analyze a blood report first. The AI needs the report data to answer questions.")
-        elif not st.session_state.chat:
-            st.warning("Please enter your OpenAI API key in the sidebar to enable the AI assistant.")
-        else:
-            # Display chat history
-            for message in st.session_state.chat_history:
-                with st.chat_message(message["role"]):
-                    st.markdown(message["content"])
-
-            # Chat input
-            if prompt := st.chat_input("Ask about your blood report..."):
-                # Add user message
-                st.session_state.chat_history.append({"role": "user", "content": prompt})
-                with st.chat_message("user"):
-                    st.markdown(prompt)
-
-                # Get AI response
-                with st.chat_message("assistant"):
-                    with st.spinner("Thinking..."):
-                        response = st.session_state.chat.get_response(prompt, st.session_state.chat_history)
-                    st.markdown(response)
-                st.session_state.chat_history.append({"role": "assistant", "content": response})
-
-            # Clear chat button
-            if st.button("Clear Chat"):
-                st.session_state.chat_history = []
-                st.rerun()
 
 if __name__ == "__main__":
     main()
