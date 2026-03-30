@@ -1,0 +1,8 @@
+category,parameter,gender,low,high,unit
+Lipid Profile,Total Cholesterol,all,125,200,mg/dL
+Lipid Profile,HDL Cholesterol,male,40,60,mg/dL
+Lipid Profile,HDL Cholesterol,female,45,65,mg/dL
+Lipid Profile,LDL Cholesterol,all,0,100,mg/dL
+Lipid Profile,Triglycerides,all,0,150,mg/dL
+Lipid Profile,VLDL,all,5,30,mg/dL
+Lipid Profile,Cholesterol/HDL Ratio,all,3.0,5.0,ratio

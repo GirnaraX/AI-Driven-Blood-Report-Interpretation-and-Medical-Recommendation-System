@@ -1,0 +1,7 @@
+category,parameter,gender,low,high,unit
+Iron Studies,Serum Iron,male,65,175,μg/dL
+Iron Studies,Serum Iron,female,50,170,μg/dL
+Iron Studies,TIBC,all,250,450,μg/dL
+Iron Studies,Ferritin,male,24,336,ng/mL
+Iron Studies,Ferritin,female,11,307,ng/mL
+Iron Studies,Transferrin Saturation,all,20,50,%

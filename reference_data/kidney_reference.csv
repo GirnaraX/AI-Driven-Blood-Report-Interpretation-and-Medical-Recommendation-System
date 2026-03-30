@@ -1,0 +1,8 @@
+category,parameter,gender,low,high,unit
+Kidney Function,Creatinine,male,0.7,1.3,mg/dL
+Kidney Function,Creatinine,female,0.6,1.1,mg/dL
+Kidney Function,BUN,all,7,20,mg/dL
+Kidney Function,BUN/Creatinine Ratio,all,10,20,ratio
+Kidney Function,Uric Acid,male,3.5,7.2,mg/dL
+Kidney Function,Uric Acid,female,2.4,6.0,mg/dL
+Kidney Function,eGFR,all,90,120,mL/min/1.73m²

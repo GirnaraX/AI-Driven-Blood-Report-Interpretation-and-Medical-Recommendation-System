@@ -1,0 +1,5 @@
+category,parameter,gender,low,high,unit
+Diabetes Profile,Fasting Glucose,all,70,99,mg/dL
+Diabetes Profile,Post Prandial Glucose,all,70,140,mg/dL
+Diabetes Profile,HbA1c,all,4.0,5.6,%
+Diabetes Profile,Random Glucose,all,70,125,mg/dL

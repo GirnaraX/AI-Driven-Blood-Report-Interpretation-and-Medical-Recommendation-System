@@ -1,0 +1,6 @@
+category,parameter,gender,low,high,unit
+Thyroid Profile,TSH,all,0.4,4.0,mIU/L
+Thyroid Profile,T3,all,80,200,ng/dL
+Thyroid Profile,T4,all,4.5,12.0,μg/dL
+Thyroid Profile,Free T3,all,2.3,4.2,pg/mL
+Thyroid Profile,Free T4,all,0.8,1.8,ng/dL

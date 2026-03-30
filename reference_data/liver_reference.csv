@@ -1,0 +1,11 @@
+category,parameter,gender,low,high,unit
+Liver Function,ALT (SGPT),male,10,40,U/L
+Liver Function,ALT (SGPT),female,7,35,U/L
+Liver Function,AST (SGOT),all,10,40,U/L
+Liver Function,ALP,all,44,147,U/L
+Liver Function,Total Bilirubin,all,0.1,1.2,mg/dL
+Liver Function,Direct Bilirubin,all,0.0,0.3,mg/dL
+Liver Function,Total Protein,all,6.0,8.3,g/dL
+Liver Function,Albumin,all,3.5,5.0,g/dL
+Liver Function,Globulin,all,2.0,3.5,g/dL
+Liver Function,A/G Ratio,all,1.0,2.5,ratio

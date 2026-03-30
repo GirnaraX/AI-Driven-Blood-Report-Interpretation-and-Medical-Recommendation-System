@@ -1,0 +1,18 @@
+category,parameter,gender,low,high,unit
+Complete Blood Count (CBC),Hemoglobin,male,13.5,17.5,g/dL
+Complete Blood Count (CBC),Hemoglobin,female,12.0,16.0,g/dL
+Complete Blood Count (CBC),RBC Count,male,4.5,5.9,million/μL
+Complete Blood Count (CBC),RBC Count,female,4.1,5.1,million/μL
+Complete Blood Count (CBC),WBC Count,all,4.0,11.0,thousand/μL
+Complete Blood Count (CBC),Platelets,all,150,450,thousand/μL
+Complete Blood Count (CBC),Hematocrit,male,40,52,%
+Complete Blood Count (CBC),Hematocrit,female,36,48,%
+Complete Blood Count (CBC),MCV,all,80,100,fL
+Complete Blood Count (CBC),MCH,all,27,33,pg
+Complete Blood Count (CBC),MCHC,all,32,36,g/dL
+Complete Blood Count (CBC),RDW,all,11.5,14.5,%
+Complete Blood Count (CBC),Neutrophils,all,40,70,%
+Complete Blood Count (CBC),Lymphocytes,all,20,40,%
+Complete Blood Count (CBC),Monocytes,all,2,8,%
+Complete Blood Count (CBC),Eosinophils,all,1,4,%
+Complete Blood Count (CBC),Basophils,all,0.5,1,%

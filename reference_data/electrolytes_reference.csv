@@ -1,0 +1,7 @@
+category,parameter,gender,low,high,unit
+Electrolytes,Sodium,all,135,145,mmol/L
+Electrolytes,Potassium,all,3.5,5.0,mmol/L
+Electrolytes,Chloride,all,98,106,mmol/L
+Electrolytes,Calcium,all,8.5,10.2,mg/dL
+Electrolytes,Magnesium,all,1.7,2.2,mg/dL
+Electrolytes,Phosphorus,all,2.5,4.5,mg/dL
