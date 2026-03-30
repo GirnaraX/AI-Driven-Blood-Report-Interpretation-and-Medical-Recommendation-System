@@ -1,169 +1,18 @@
-# blood_analyzer.py
+from reference_data.cbc_reference import CBC_REFERENCE
+from reference_data.lipid_reference import LIPID_REFERENCE
+from reference_data.liver_reference import LIVER_REFERENCE
+from reference_data.kidney_reference import KIDNEY_REFERENCE
+from reference_data.thyroid_reference import THYROID_REFERENCE
+from reference_data.diabetes_reference import DIABETES_REFERENCE
+from reference_data.iron_reference import IRON_REFERENCE
+from reference_data.electrolytes_reference import ELECTROLYTES_REFERENCE
+from reference_data.recommendations import RECOMMENDATIONS
 
-# Blood test reference ranges (same as original)
-REFERENCE_RANGES = {
-    "Complete Blood Count (CBC)": {
-        "Hemoglobin": {"male": (13.5, 17.5), "female": (12.0, 16.0), "unit": "g/dL"},
-        "RBC Count": {"male": (4.5, 5.9), "female": (4.1, 5.1), "unit": "million/μL"},
-        "WBC Count": {"all": (4.0, 11.0), "unit": "thousand/μL"},
-        "Platelets": {"all": (150, 450), "unit": "thousand/μL"},
-        "Hematocrit": {"male": (40, 54), "female": (36, 48), "unit": "%"},
-        "MCV": {"all": (80, 100), "unit": "fL"},
-        "MCH": {"all": (27, 33), "unit": "pg"},
-        "MCHC": {"all": (32, 36), "unit": "g/dL"},
-        "RDW": {"all": (11.5, 14.5), "unit": "%"},
-        "Neutrophils": {"all": (40, 75), "unit": "%"},
-        "Lymphocytes": {"all": (20, 45), "unit": "%"},
-        "Monocytes": {"all": (2, 10), "unit": "%"},
-        "Eosinophils": {"all": (1, 6), "unit": "%"},
-        "Basophils": {"all": (0, 2), "unit": "%"}
-    },
-    "Lipid Profile": {
-        "Total Cholesterol": {"all": (125, 200), "unit": "mg/dL"},
-        "HDL Cholesterol": {"male": (40, 60), "female": (50, 60), "unit": "mg/dL"},
-        "LDL Cholesterol": {"all": (0, 100), "unit": "mg/dL"},
-        "Triglycerides": {"all": (0, 150), "unit": "mg/dL"},
-        "VLDL": {"all": (2, 30), "unit": "mg/dL"},
-        "Cholesterol/HDL Ratio": {"all": (3.5, 5.0), "unit": "ratio"}
-    },
-    "Liver Function": {
-        "ALT (SGPT)": {"all": (7, 56), "unit": "U/L"},
-        "AST (SGOT)": {"all": (10, 40), "unit": "U/L"},
-        "ALP": {"all": (44, 147), "unit": "U/L"},
-        "Total Bilirubin": {"all": (0.1, 1.2), "unit": "mg/dL"},
-        "Direct Bilirubin": {"all": (0.1, 0.4), "unit": "mg/dL"},
-        "Total Protein": {"all": (6.0, 8.3), "unit": "g/dL"},
-        "Albumin": {"all": (3.5, 5.0), "unit": "g/dL"},
-        "Globulin": {"all": (2.0, 3.5), "unit": "g/dL"},
-        "A/G Ratio": {"all": (1.0, 2.2), "unit": "ratio"}
-    },
-    "Kidney Function": {
-        "Creatinine": {"male": (0.7, 1.3), "female": (0.6, 1.1), "unit": "mg/dL"},
-        "BUN": {"all": (7, 20), "unit": "mg/dL"},
-        "BUN/Creatinine Ratio": {"all": (6, 25), "unit": "ratio"},
-        "Uric Acid": {"male": (3.4, 7.0), "female": (2.4, 6.0), "unit": "mg/dL"},
-        "eGFR": {"all": (90, 120), "unit": "mL/min/1.73m²"}
-    },
-    "Thyroid Profile": {
-        "TSH": {"all": (0.4, 4.0), "unit": "mIU/L"},
-        "T3": {"all": (80, 200), "unit": "ng/dL"},
-        "T4": {"all": (5.0, 12.0), "unit": "μg/dL"},
-        "Free T3": {"all": (2.3, 4.2), "unit": "pg/mL"},
-        "Free T4": {"all": (0.8, 1.8), "unit": "ng/dL"}
-    },
-    "Diabetes Profile": {
-        "Fasting Glucose": {"all": (70, 99), "unit": "mg/dL"},
-        "Post Prandial Glucose": {"all": (100, 140), "unit": "mg/dL"},
-        "HbA1c": {"all": (4.0, 5.6), "unit": "%"},
-        "Random Glucose": {"all": (70, 140), "unit": "mg/dL"}
-    },
-    "Iron Studies": {
-        "Serum Iron": {"male": (65, 176), "female": (50, 170), "unit": "μg/dL"},
-        "TIBC": {"all": (250, 450), "unit": "μg/dL"},
-        "Ferritin": {"male": (24, 336), "female": (11, 307), "unit": "ng/mL"},
-        "Transferrin Saturation": {"male": (20, 50), "female": (15, 50), "unit": "%"}
-    },
-    "Electrolytes": {
-        "Sodium": {"all": (135, 145), "unit": "mmol/L"},
-        "Potassium": {"all": (3.5, 5.0), "unit": "mmol/L"},
-        "Chloride": {"all": (98, 107), "unit": "mmol/L"},
-        "Calcium": {"all": (8.5, 10.2), "unit": "mg/dL"},
-        "Magnesium": {"all": (1.7, 2.2), "unit": "mg/dL"},
-        "Phosphorus": {"all": (2.5, 4.5), "unit": "mg/dL"}
-    }
-}
-
-# Medical recommendations database
-RECOMMENDATIONS = {
-    "Anemia": {
-        "condition": "Low hemoglobin, RBC, or hematocrit",
-        "recommendations": [
-            "Increase iron-rich foods (spinach, lean red meat, beans)",
-            "Consider iron supplements after consulting doctor",
-            "Include vitamin C for better iron absorption",
-            "Avoid tea/coffee with meals"
-        ],
-        "severity": "moderate",
-        "follow_up": "Repeat blood test in 3 months"
-    },
-    "High Cholesterol": {
-        "condition": "Elevated total cholesterol or LDL",
-        "recommendations": [
-            "Reduce saturated fats and trans fats",
-            "Increase soluble fiber (oats, fruits, vegetables)",
-            "Regular aerobic exercise (30 mins/day)",
-            "Consider plant sterols/stanols"
-        ],
-        "severity": "moderate",
-        "follow_up": "Repeat lipid profile in 3-6 months"
-    },
-    "Diabetes Risk": {
-        "condition": "Elevated fasting glucose or HbA1c",
-        "recommendations": [
-            "Monitor carbohydrate intake",
-            "Regular physical activity",
-            "Maintain healthy weight",
-            "Limit sugary foods and beverages"
-        ],
-        "severity": "high",
-        "follow_up": "Consult doctor for glucose tolerance test"
-    },
-    "Thyroid Dysfunction": {
-        "condition": "Abnormal TSH levels",
-        "recommendations": [
-            "Consult endocrinologist",
-            "Take prescribed medication regularly",
-            "Avoid soy and high-iodine foods if hyperthyroid",
-            "Regular thyroid function monitoring"
-        ],
-        "severity": "moderate",
-        "follow_up": "Repeat thyroid profile in 6-8 weeks"
-    },
-    "Liver Stress": {
-        "condition": "Elevated liver enzymes",
-        "recommendations": [
-            "Avoid alcohol completely",
-            "Reduce fatty foods",
-            "Stay hydrated",
-            "Review medications with doctor"
-        ],
-        "severity": "high",
-        "follow_up": "Repeat LFT in 4-6 weeks"
-    },
-    "Kidney Stress": {
-        "condition": "Elevated creatinine or BUN",
-        "recommendations": [
-            "Stay well hydrated",
-            "Limit protein intake",
-            "Avoid NSAIDs",
-            "Monitor blood pressure"
-        ],
-        "severity": "high",
-        "follow_up": "Repeat kidney function test in 2-4 weeks"
-    },
-    "Infection": {
-        "condition": "Elevated WBC count",
-        "recommendations": [
-            "Get adequate rest",
-            "Increase fluid intake",
-            "Monitor temperature",
-            "Consult doctor if symptoms persist"
-        ],
-        "severity": "moderate",
-        "follow_up": "Repeat CBC after treatment"
-    },
-    "Inflammation": {
-        "condition": "Abnormal ESR or CRP",
-        "recommendations": [
-            "Anti-inflammatory diet",
-            "Regular exercise",
-            "Stress management",
-            "Consult rheumatologist if persistent"
-        ],
-        "severity": "moderate",
-        "follow_up": "Monitor symptoms and repeat tests"
-    }
-}
+# Combine all reference ranges
+REFERENCE_RANGES = {}
+for ref in [CBC_REFERENCE, LIPID_REFERENCE, LIVER_REFERENCE, KIDNEY_REFERENCE,
+            THYROID_REFERENCE, DIABETES_REFERENCE, IRON_REFERENCE, ELECTROLYTES_REFERENCE]:
+    REFERENCE_RANGES.update(ref)
 
 
 class BloodReportAnalyzer:

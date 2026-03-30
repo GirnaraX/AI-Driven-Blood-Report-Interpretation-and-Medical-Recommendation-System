@@ -129,3 +129,14 @@ patient_info_name,patient_info_age,patient_info_gender,patient_info_blood_group,
 
 ✅ No significant abnormalities detected. Parameters are within normal range.
 ","[{""category"": ""Lipid Profile"", ""parameter"": ""Total Cholesterol"", ""value"": 180, ""unit"": ""mg/dL"", ""low"": 125, ""high"": 200, ""status"": ""normal""}, {""category"": ""Lipid Profile"", ""parameter"": ""HDL Cholesterol"", ""value"": 50, ""unit"": ""mg/dL"", ""low"": 40, ""high"": 60, ""status"": ""normal""}, {""category"": ""Lipid Profile"", ""parameter"": ""LDL Cholesterol"", ""value"": 100, ""unit"": ""mg/dL"", ""low"": 0, ""high"": 100, ""status"": ""normal""}, {""category"": ""Lipid Profile"", ""parameter"": ""Triglycerides"", ""value"": 120, ""unit"": ""mg/dL"", ""low"": 0, ""high"": 150, ""status"": ""normal""}, {""category"": ""Lipid Profile"", ""parameter"": ""VLDL"", ""value"": 20, ""unit"": ""mg/dL"", ""low"": 2, ""high"": 30, ""status"": ""normal""}, {""category"": ""Lipid Profile"", ""parameter"": ""Cholesterol/HDL Ratio"", ""value"": 3.6, ""unit"": ""ratio"", ""low"": 3.5, ""high"": 5.0, ""status"": ""normal""}]",[],[],[],[],2026-03-26T17:28:25.129110
+,0,male,A+,2026-03-30,220,50,100,120,20,3.6,"### Analysis Summary
+
+- **Patient:** Male, Age 0
+- **Parameters Analyzed:** 6
+- **Normal Parameters:** 5
+- **Abnormal Parameters:** 1
+- **Critical Parameters:** 0
+
+**Potential Conditions Detected:**
+- 🟡 High Cholesterol (Severity: moderate)
+","[{""category"": ""Lipid Profile"", ""parameter"": ""HDL Cholesterol"", ""value"": 50, ""unit"": ""mg/dL"", ""low"": 40, ""high"": 60, ""status"": ""normal""}, {""category"": ""Lipid Profile"", ""parameter"": ""LDL Cholesterol"", ""value"": 100, ""unit"": ""mg/dL"", ""low"": 0, ""high"": 100, ""status"": ""normal""}, {""category"": ""Lipid Profile"", ""parameter"": ""Triglycerides"", ""value"": 120, ""unit"": ""mg/dL"", ""low"": 0, ""high"": 150, ""status"": ""normal""}, {""category"": ""Lipid Profile"", ""parameter"": ""VLDL"", ""value"": 20, ""unit"": ""mg/dL"", ""low"": 2, ""high"": 30, ""status"": ""normal""}, {""category"": ""Lipid Profile"", ""parameter"": ""Cholesterol/HDL Ratio"", ""value"": 3.6, ""unit"": ""ratio"", ""low"": 3.5, ""high"": 5.0, ""status"": ""normal""}]","[{""category"": ""Lipid Profile"", ""parameter"": ""Total Cholesterol"", ""value"": 220, ""unit"": ""mg/dL"", ""low"": 125, ""high"": 200, ""status"": ""high""}]",[],"[{""condition"": ""High Cholesterol"", ""parameters"": [""Total Cholesterol""], ""severity"": ""moderate""}]","[{""condition"": ""High Cholesterol"", ""severity"": ""moderate"", ""recommendations"": [""Reduce saturated fats and trans fats"", ""Increase soluble fiber (oats, fruits, vegetables)"", ""Regular aerobic exercise (30 mins/day)"", ""Consider plant sterols/stanols""], ""follow_up"": ""Repeat lipid profile in 3-6 months""}]",2026-03-30T11:09:21.744805
